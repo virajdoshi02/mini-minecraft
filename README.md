@@ -1,43 +1,16 @@
-# mini-minecraft
+# Mini Minecraft
 
 ## Demo Video
 
 [![Demo Video](https://img.youtube.com/vi/zn0icurnbRY/0.jpg)](https://www.youtube.com/watch?v=zn0icurnbRY)
-> A quick demo of my Mini Minecraft project, which I developed with Viraj Doshi and Steven Chang. We tour you through some caves systems and biomes, show you the day/night cycle and directional lighting, and display the post-processing effects from going underwater or into lava. 
+> A quick demo of my Mini Minecraft project, which I developed with Nicholas Cirillo and Steven Chang in C++ and GLSL. We tour you through some caves systems and biomes, show you the day/night cycle and directional lighting, and display the post-processing effects from going underwater or into lava. 
 
 > The choppy framerate is because we recorded on remote PCs with latency!
 
 ## Mini Minecraft Team
-I worked on this project with [Viraj Doshi](https://github.com/virajdoshi02) and [Steven Chang](https://github.com/zminsc).
+I worked on this project with [Nicholas Cirillo](https://github.com/nick-cirillo) and [Steven Chang](https://github.com/zminsc).
 
 ## Features
-
-### [Nick Cirillo](https://github.com/nick-cirillo)
-
-#### Efficient Terrain Rendering and Chunking
-
-I used a single interleaved VBO to contain the vertex, normal, and color data. I created a structure to contain relative block faces to avoid creating repeated code in the VBO setup function, and I used a map for the colors to make accessing them easier without a big if-else statement. I also implemented logic to load new chunks, and additionally, the m_setupChunks map to keep track of which chunks were setup and did not need to have their VBO created again, thus making rendering many times more efficient. I switched the rendering of the chunks to the progLambert shader, which ensured the model matrix was applied properly. I also used the attribute OpenGL hooks to separate the positions, normals, and colors, which then led me to create an index buffer that only references the positional information.
-
-I also implemented a bounds-check in the rendering call so that the engine only draws the 9 "terrain generation zones" that surround the player.
-
-#### Texturing
-
-I added the ability to use UV coordinates in the VBOs for each chunk, thus mapping a texture from a texture map to each visible block face. I created a helper file for this purpose, which contains a nested mapping that allowed me to access block textures without a large branching if/else statement. I also modified the fragment shader to use these UV coordinates to render the texture with lambertian shading. I included an invariant of each UV component of the VBO such that the w-coordinate of each UV vec4 represented the alpha of that block (whether it is transparent, 1, or not, 0).
-
-I also implemented texture animation for the water and lava, which makes use of a uniform variable for time passed to the fragment shader. The texture "slides" along a repeated pattern in the texture file, and loops smoothly by modding the time value with the number of pixels in those textures. Which blocks should animated is specified in a set in the chunkhelpers file. I also modified the texture file to include several transparent spaces so that I only render the top of the water.
-
-I also split the VBOs for opaque and transparent/translucent blocks. I created new variables and functions to handle the new transparency VBO and pass the data to OpenGL. I also introduced additional loops to the terrain draw function so that all transparent blocks in all chunks are rendered after all opaque blocks across all chunks.
-
-
-#### Day/Night Cycle
-
-I created a day/night cycle in which the sun rises and sets. Clouds and a hazy sky are created with worley noise, and then different color palettes (day, sunset, dusk, evening) are blended in the fragment shader, meaning that the sky colors change throughout the cycle - bright and cloudy during the day, vivid during sunset, and dark blue at night.
-
-The sun moves throughout the sky. It is not an entity, rather, it is a direction specified in the fragment shader, and the sun itself is created by finding the angle between the fragment direction and the direction of the sun. If the angle is small, we set the color to yellow, if it is slightly larger, we blend yellow into the sky to create a sun halo effect. If it is larger than a certain amount, we just set to the blended sky color. 
-
-The sky colors change by checking the height of the sun and comparing it to several manually-set boundaries representing different times of day using a smoothstep function, then blending different proportions of the color palettes into the sky using the output of those smoothstep functions.
-
-Finally, I created directional lighting for the world, meaning the angle of the sun influences how the blocks are being lit. The sun direction is substituted in for the light vector in the lambert shader, which creates an effect where the position of the sun illuminates the blocks.
 
 ### [Viraj Doshi](https://github.com/virajdoshi02)
 
@@ -60,6 +33,22 @@ Then, I edited the lava and water shades to make newer post process effects that
 
 Lastly, I created a new b2 variable in the terrain class, and used bilinear interpolation to interpolate between 4 biomes, as I added a desert biome where there is no water, and an ice biome where all the water is ice. All 4 biome have different terrain shapes on top, but the same cave systems below.
 
+
+### [Nick Cirillo](https://github.com/nick-cirillo)
+
+#### Efficient Terrain Rendering and Chunking
+
+I used a single interleaved VBO to contain the vertex, normal, and color data. I created a structure to contain relative block faces to avoid creating repeated code in the VBO setup function, and I used a map for the colors to make accessing them easier without a big if-else statement. I also implemented logic to load new chunks, and additionally, the m_setupChunks map to keep track of which chunks were setup and did not need to have their VBO created again, thus making rendering many times more efficient. I switched the rendering of the chunks to the progLambert shader, which ensured the model matrix was applied properly. I also used the attribute OpenGL hooks to separate the positions, normals, and colors, which then led me to create an index buffer that only references the positional information.
+
+
+#### Texturing
+
+I added the ability to use UV coordinates in the VBOs for each chunk, thus mapping a texture from a texture map to each visible block face. I created a helper file for this purpose, which contains a nested mapping that allowed me to access block textures without a large branching if/else statement. I also modified the fragment shader to use these UV coordinates to render the texture with lambertian shading. I also split the VBOs for opaque and transparent/translucent blocks. I created new variables and functions to handle the new transparency VBO and pass the data to OpenGL. I also introduced additional loops to the terrain draw function so that all transparent blocks in all chunks are rendered after all opaque blocks across all chunks.
+
+
+#### Day/Night Cycle
+
+I created a day/night cycle in which the sun rises and sets. Clouds and a hazy sky are created with worley noise, and then different color palettes (day, sunset, dusk, evening) are blended in the fragment shader, meaning that the sky colors change throughout the cycle - bright and cloudy during the day, vivid during sunset, and dark blue at night. The sun moves throughout the sky. It is not an entity, rather, it is a direction specified in the fragment shader, and the sun itself is created by finding the angle between the fragment direction and the direction of the sun. If the angle is small, we set the color to yellow, if it is slightly larger, we blend yellow into the sky to create a sun halo effect. If it is larger than a certain amount, we just set to the blended sky color. 
 
 ### [Steven Chang](https://github.com/zminsc)
 
